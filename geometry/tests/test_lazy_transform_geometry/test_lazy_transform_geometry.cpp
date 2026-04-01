@@ -28,7 +28,7 @@
 #include "geometry/wrappers.h"
 #include <math/concepts/basic.h>
 #include <math/random.h>
-#include <rtb/optional.h>
+#include <optional>
 #include "common/macros.h"
 
 #include <algorithm>
@@ -47,9 +47,9 @@ namespace sdc::geometry {
     template <typename FromGeometry, typename LTG, typename FLTG>
     void CheckCorrectDistanceLTG(
         const LTG& ltg, const FromGeometry& from, const FLTG& false_ltg,
-        rtb::Optional<double>& answer_dist, rtb::Optional<double>& answer_deep_dist,
-        rtb::Optional<double>& answer_or_dist) {
-        auto check_part = [&](auto lambda_dist, rtb::Optional<double>& answer) {
+        std::optional<double>& answer_dist, std::optional<double>& answer_deep_dist,
+        std::optional<double>& answer_or_dist) {
+        auto check_part = [&](auto lambda_dist, std::optional<double>& answer) {
             double val = lambda_dist(ltg, from);
             double com_val = lambda_dist(from, ltg);
 
@@ -79,14 +79,14 @@ namespace sdc::geometry {
         }
 
         if constexpr (geometry::traits::HasDistanceSqGenericImpl<wrapped_type, from_type>) {
-            rtb::Optional<double> answer_dist_sq =
-                (answer_dist ? (*answer_dist * (*answer_dist)) : answer_dist);
+            std::optional<double> answer_dist_sq =
+                (answer_dist ? std::optional<double>(*answer_dist * (*answer_dist)) : std::nullopt);
             check_part([](const auto& l, const auto& r) { return geometry::DistanceSq(l, r); }, answer_dist_sq);
         }
 
         if constexpr (geometry::traits::HasDeepDistanceSqGenericImpl<wrapped_type, from_type>) {
-            rtb::Optional<double> answer_deep_dist_sq =
-                (answer_deep_dist ? (*answer_deep_dist * math::abs(*answer_deep_dist)) : answer_deep_dist);
+            std::optional<double> answer_deep_dist_sq =
+                (answer_deep_dist ? std::optional<double>(*answer_deep_dist * math::abs(*answer_deep_dist)) : std::nullopt);
             check_part(
                 [](const auto& l, const auto& r) { return geometry::DeepDistanceSq(l, r); },
                 answer_deep_dist_sq);
@@ -102,9 +102,9 @@ namespace sdc::geometry {
     void CheckCorrectDistance(
         std::mt19937_64& rd, const FromGeometry& from, const ToGeometry& geometry,
         const geometry::Vector& geometry_center, const geometry::Vector& shift, const geometry::Direction& angle,
-        rtb::Optional<double> answer_dist = rtb::nullopt,
-        rtb::Optional<double> answer_deep_dist = rtb::nullopt,
-        rtb::Optional<double> answer_or_dist = rtb::nullopt) {
+        std::optional<double> answer_dist = std::nullopt,
+        std::optional<double> answer_deep_dist = std::nullopt,
+        std::optional<double> answer_or_dist = std::nullopt) {
         auto rd_false_geometry = geometry::Random<std::remove_cvref_t<ToGeometry>>(rd);
         geometry::LazyTransformGeometry false_ltg{
             &rd_false_geometry, geometry::Random<geometry::Vector>(rd), geometry::Random<geometry::Vector>(rd),
@@ -129,7 +129,7 @@ namespace sdc::geometry {
         CheckCorrectDistanceLTG(ltg4, from, false_ltg, answer_dist, answer_deep_dist, answer_or_dist);
 
         geometry::LazyTransformGeometry ltg6{
-            rtb::MakeOptional<ToGeometry>(geometry), geometry_center, shift, angle};
+            std::make_optional<ToGeometry>(geometry), geometry_center, shift, angle};
         CheckCorrectDistanceLTG(ltg4, from, false_ltg, answer_dist, answer_deep_dist, answer_or_dist);
     }
 
@@ -167,11 +167,11 @@ namespace sdc::geometry {
             const auto rd_shift = geometry::Random<geometry::Vector>(rd);
 
             {
-                auto get_ans_geometry = [&]() -> rtb::Optional<InnerGeometry> {
+                auto get_ans_geometry = [&]() -> std::optional<InnerGeometry> {
                     if constexpr (
                         geometry::IsBaton<InnerGeometry> ||
                         geometry::ConceptTypeOf<InnerGeometry> == ConceptType::kSimplePolygon) {
-                        return rtb::nullopt;
+                        return std::nullopt;
                     } else if constexpr (geometry::ConceptTypeOf<InnerGeometry> == ConceptType::kRectangle) {
                         geometry::Point ans_center_shifted = (geometry::Point::Zero() + geometry_center + rd_shift);
                         return geometry::Rectangle{
@@ -188,12 +188,12 @@ namespace sdc::geometry {
                         SDC_FAIL();
                     }
                 };
-                rtb::Optional<double> ans_dist = [&]() {
+                std::optional<double> ans_dist = [&]() -> std::optional<double> {
                     if constexpr (
                         geometry::IsBaton<InnerGeometry> ||
                         geometry::ConceptTypeOf<InnerGeometry> == ConceptType::kSimplePolygon ||
                         geometry::ConceptTypeOf<InnerGeometry> == ConceptType::kBox) {
-                        return rtb::nullopt;
+                        return std::nullopt;
                     } else if constexpr ( // NOLINT
                         geometry::ConceptTypeOf<InnerGeometry> == ConceptType::kRectangle ||
                         geometry::IsCircle<InnerGeometry> ||
@@ -204,13 +204,13 @@ namespace sdc::geometry {
                         SDC_FAIL();
                     }
                 }();
-                rtb::Optional<double> ans_deep_dist = [&]() {
+                std::optional<double> ans_deep_dist = [&]() -> std::optional<double> {
                     if constexpr (
                         geometry::IsBaton<InnerGeometry> ||
                         geometry::ConceptTypeOf<InnerGeometry> == ConceptType::kSimplePolygon ||
                         geometry::ConceptTypeOf<InnerGeometry> == ConceptType::kRectangle ||
                         geometry::ConceptTypeOf<InnerGeometry> == ConceptType::kBox) {
-                        return rtb::nullopt;
+                        return std::nullopt;
                     } else if constexpr ( // NOLINT
                         geometry::IsCircle<InnerGeometry> ||
                         geometry::ConceptTypeOf<InnerGeometry> == ConceptType::kPoint) {
@@ -226,7 +226,7 @@ namespace sdc::geometry {
 
             // rd_center ckecking
             {
-                const rtb::Optional<geometry::Vector> rd_center = [&]() {
+                const std::optional<geometry::Vector> rd_center = [&]() -> std::optional<geometry::Vector> {
                     if constexpr (geometry::ConceptTypeOf<InnerGeometry> == ConceptType::kPoint) {
                         return rd_geometry - geometry::Point::Zero();
                     } else if constexpr ( // NOLINT
@@ -234,7 +234,7 @@ namespace sdc::geometry {
                         geometry::ConceptTypeOf<InnerGeometry> == ConceptType::kSimplePolygon ||
                         geometry::ConceptTypeOf<InnerGeometry> == ConceptType::kRectangle ||
                         geometry::ConceptTypeOf<InnerGeometry> == ConceptType::kBox) {
-                        return rtb::nullopt;
+                        return std::nullopt;
                     } else if constexpr (geometry::IsCircle<InnerGeometry>) {
                         const geometry::Vector rd_vec_from_center =
                             geometry::Random<geometry::Vector>(rd).normalized() *
@@ -247,7 +247,7 @@ namespace sdc::geometry {
                 if (!rd_center) {
                     continue;
                 }
-                auto get_ans_geometry = [&]() -> rtb::Optional<InnerGeometry> {
+                auto get_ans_geometry = [&]() -> std::optional<InnerGeometry> {
                     if constexpr (geometry::ConceptTypeOf<InnerGeometry> == ConceptType::kPoint) {
                         return geometry::Point{geometry::GetX(*rd_center), geometry::GetY(*rd_center)};
                     } else if constexpr ( // NOLINT
@@ -256,7 +256,7 @@ namespace sdc::geometry {
                         geometry::ConceptTypeOf<InnerGeometry> == ConceptType::kPoint ||
                         geometry::ConceptTypeOf<InnerGeometry> == ConceptType::kRectangle ||
                         geometry::ConceptTypeOf<InnerGeometry> == ConceptType::kBox) {
-                        return rtb::nullopt;
+                        return std::nullopt;
                     } else if constexpr (geometry::IsCircle<InnerGeometry>) {
                         const geometry::Vector rd_vec_from_center = *rd_center - geometry_center;
                         geometry::Vector vec_from_center_rotate = RotateVector(rd_vec_from_center, rd_angle);
@@ -270,14 +270,14 @@ namespace sdc::geometry {
                         SDC_FAIL();
                     }
                 };
-                rtb::Optional<double> ans_dist = [&]() {
+                std::optional<double> ans_dist = [&]() -> std::optional<double> {
                     if constexpr (
                         geometry::IsBaton<InnerGeometry> ||
                         geometry::ConceptTypeOf<InnerGeometry> == ConceptType::kSimplePolygon ||
                         geometry::ConceptTypeOf<InnerGeometry> == ConceptType::kRectangle ||
                         geometry::ConceptTypeOf<InnerGeometry> == ConceptType::kPoint ||
                         geometry::ConceptTypeOf<InnerGeometry> == ConceptType::kBox) {
-                        return rtb::nullopt;
+                        return std::nullopt;
                     } else if constexpr (geometry::IsCircle<InnerGeometry>) {
                         auto ans = get_ans_geometry();
                         return geometry::Distance(rd_req, *VERIFY(ans));
@@ -285,14 +285,14 @@ namespace sdc::geometry {
                         SDC_FAIL();
                     }
                 }();
-                rtb::Optional<double> ans_deep_dist = [&]() {
+                std::optional<double> ans_deep_dist = [&]() -> std::optional<double> {
                     if constexpr (
                         geometry::IsBaton<InnerGeometry> ||
                         geometry::ConceptTypeOf<InnerGeometry> == ConceptType::kSimplePolygon ||
                         geometry::ConceptTypeOf<InnerGeometry> == ConceptType::kRectangle ||
                         geometry::ConceptTypeOf<InnerGeometry> == ConceptType::kPoint ||
                         geometry::ConceptTypeOf<InnerGeometry> == ConceptType::kBox) {
-                        return rtb::nullopt;
+                        return std::nullopt;
                     } else if constexpr (geometry::IsCircle<InnerGeometry>) {
                         auto ans = get_ans_geometry();
                         return geometry::DeepDistance(rd_req, *VERIFY(ans));

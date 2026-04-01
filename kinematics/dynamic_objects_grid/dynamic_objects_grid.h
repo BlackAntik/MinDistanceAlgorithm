@@ -8,17 +8,13 @@
 #include "geometry/lazy_transform_geometry.h"
 #include "geometry/point.h"
 #include "geometry/vector.h"
-#include "geometry_utils/objects_grid/objects_grid.h"
-#include "kinematics/approx/direction_between.h"
-#include "kinematics/checks.h"
+#include "geometry_utils/static_objects_grid/static_objects_grid.h"
 #include "kinematics/concepts/basic/basic.h"
-#include "kinematics/concepts/concepts.h"
 #include "kinematics/convert.h"
-#include "kinematics/move_for.h"
 #include "kinematics/position.h"
 #include <math/concepts/basic.h>
 #include <math/math.h>
-#include <rtb/optional.h>
+#include <optional>
 #include <time/checks.h>
 #include <time/concepts/basic.h>
 #include <time/concepts/properties/properties.h>
@@ -36,7 +32,7 @@
 
 #include "ros/duration.h"
 #include "common/macros.h"
-#include "geometry_utils/objects_gride/bitset_wrapper.h"
+#include "geometry_utils/objects_grid/bitset_wrapper.h"
 
 namespace sdc::kinematics {
 
@@ -209,8 +205,8 @@ namespace sdc::kinematics {
 
     private:
         GeometryType fast_geometry_;
-        rtb::Optional<GeometryType> accurate_geometry_;
-        rtb::Optional<GeometryType> grid_geometry_;
+        std::optional<GeometryType> accurate_geometry_;
+        std::optional<GeometryType> grid_geometry_;
     };
 
     template <
@@ -232,7 +228,7 @@ namespace sdc::kinematics {
             MotionSplineT point,
             GeometryType fast_geometry,
             Point fast_geometry_base,
-            rtb::Optional<TimeT> max_timestamp = rtb::nullopt,
+            std::optional<TimeT> max_timestamp = std::nullopt,
             bool prolong_object_lifetime = false)
             : motion_spline_(std::move(point))
             , fast_geometry_(std::move(fast_geometry))
@@ -248,7 +244,7 @@ namespace sdc::kinematics {
             Point fast_geometry_base,
             GeometryType accurate_geometry,
             Point accurate_geometry_base,
-            rtb::Optional<TimeT> max_timestamp = rtb::nullopt,
+            std::optional<TimeT> max_timestamp = std::nullopt,
             bool prolong_object_lifetime = false)
             : motion_spline_(std::move(point))
             , fast_geometry_(geometry::Convert<Vector>(fast_geometry))
@@ -268,7 +264,7 @@ namespace sdc::kinematics {
             Point accurate_geometry_base,
             GeometryType grid_geometry,
             Point grid_geometry_base,
-            rtb::Optional<TimeT> max_timestamp = rtb::nullopt,
+            std::optional<TimeT> max_timestamp = std::nullopt,
             bool prolong_object_lifetime = false)
             : motion_spline_(std::move(point))
             , fast_geometry_(std::move(fast_geometry))
@@ -357,11 +353,11 @@ namespace sdc::kinematics {
         MotionSplineT motion_spline_;
         GeometryType fast_geometry_;
         Vector fast_geometry_base_;
-        rtb::Optional<TimeT> max_timestamp_;
-        rtb::Optional<GeometryType> accurate_geometry_;
-        rtb::Optional<Vector> accurate_geometry_base_;
-        rtb::Optional<GeometryType> grid_geometry_;
-        rtb::Optional<Vector> grid_geometry_base_;
+        std::optional<TimeT> max_timestamp_;
+        std::optional<GeometryType> accurate_geometry_;
+        std::optional<Vector> accurate_geometry_base_;
+        std::optional<GeometryType> grid_geometry_;
+        std::optional<Vector> grid_geometry_base_;
         bool prolong_object_lifetime_ = false;
     };
 
@@ -386,7 +382,7 @@ namespace sdc::kinematics {
             TrajectoryT trajectory,
             GeometryType fast_geometry,
             DirectedPoint fast_geometry_base,
-            rtb::Optional<TimeT> max_timestamp = rtb::nullopt,
+            std::optional<TimeT> max_timestamp = std::nullopt,
             bool prolong_object_lifetime = false)
             : trajectory_(std::move(trajectory))
             , fast_geometry_(std::move(fast_geometry))
@@ -403,7 +399,7 @@ namespace sdc::kinematics {
             DirectedPoint fast_geometry_base,
             GeometryType accurate_geometry,
             DirectedPoint accurate_geometry_base,
-            rtb::Optional<TimeT> max_timestamp = rtb::nullopt,
+            std::optional<TimeT> max_timestamp = std::nullopt,
             bool prolong_object_lifetime = false)
             : trajectory_(std::move(trajectory))
             , fast_geometry_(fast_geometry)
@@ -424,7 +420,7 @@ namespace sdc::kinematics {
             DirectedPoint accurate_geometry_base,
             GeometryType grid_geometry,
             DirectedPoint grid_geometry_base,
-            rtb::Optional<TimeT> max_timestamp = rtb::nullopt,
+            std::optional<TimeT> max_timestamp = std::nullopt,
             bool prolong_object_lifetime = false)
             : trajectory_(std::move(trajectory))
             , fast_geometry_(std::move(fast_geometry))
@@ -540,11 +536,11 @@ namespace sdc::kinematics {
         std::vector<TimeT> timestamps_;
         GeometryType fast_geometry_;
         DirectedPoint fast_geometry_base_;
-        rtb::Optional<TimeT> max_timestamp_;
-        rtb::Optional<GeometryType> accurate_geometry_;
-        rtb::Optional<DirectedPoint> accurate_geometry_base_;
-        rtb::Optional<GeometryType> grid_geometry_;
-        rtb::Optional<DirectedPoint> grid_geometry_base_;
+        std::optional<TimeT> max_timestamp_;
+        std::optional<GeometryType> accurate_geometry_;
+        std::optional<DirectedPoint> accurate_geometry_base_;
+        std::optional<GeometryType> grid_geometry_;
+        std::optional<DirectedPoint> grid_geometry_base_;
         bool prolong_object_lifetime_ = false;
     };
 
