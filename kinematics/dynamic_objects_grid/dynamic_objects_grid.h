@@ -5,8 +5,7 @@
 #include "geometry/convert.h"
 #include "geometry/directed_point.h"
 #include "geometry/distance.h"
-#include "geometry/lazy_transform_geometry.h"
-#include "geometry/point.h"
+#include "geometry/lazy_transformation_geometry.h"
 #include "geometry/vector.h"
 #include "geometry_utils/static_objects_grid/static_objects_grid.h"
 #include "kinematics/concepts/basic/basic.h"
@@ -23,14 +22,11 @@
 #include <tools/assert_stream.h>
 #include <tools/parallel_algorithm.h>
 #include <tools/smart_ptr.h>
-#include <sdg/sdc/ros/profiling/str_literal_or_str.h>
 
 #include <algorithm>
-#include <ros/time.h>
 #include <utility>
 #include <vector>
 
-#include "ros/duration.h"
 #include "common/macros.h"
 #include "geometry_utils/objects_grid/bitset_wrapper.h"
 
@@ -44,7 +40,7 @@ namespace sdc::kinematics {
         };
 
         template <typename T>
-        concept IsRefereenceWrapper = requires(T a) {
+        concept IsReferenceWrapper = requires(T a) {
             { a.get() } -> std::same_as<const typename T::type&>;
         };
 
@@ -62,7 +58,7 @@ namespace sdc::kinematics {
         virtual ~DynamicObject() = default;
 
         using OriginalGeometry = GeometryType;
-        using DynamicGeometry = geometry::LazyTransformGeometry<GeometryType>;
+        using DynamicGeometry = geometry::LazyTransformationGeometry<GeometryType>;
         using Time = TimeT;
         using Scalar = geometry::ScalarOf<GeometryType>;
         using Point = geometry::PointT<Scalar>;
@@ -574,7 +570,7 @@ namespace sdc::kinematics {
         template <GeometryAccessType access_type = GeometryAccessType::kFast>
         void SetObjects(std::vector<DynamicObjectT> objects) {
             objects_ = std::move(objects);
-            SDC_VERIFY_STREAM(
+            VERIFY_STREAM(
                 objects_.size() <= ObjectsFilter::max_stored_objects_count,
                 "Too many objects: " << objects_.size() << " > "
                                      << ObjectsFilter::max_stored_objects_count);
@@ -586,7 +582,7 @@ namespace sdc::kinematics {
         template <GeometryAccessType access_type = GeometryAccessType::kFast, typename ThreadPool>
         void SetObjects(std::vector<DynamicObjectT> objects, std::shared_ptr<ThreadPool> thread_pool) {
             objects_ = std::move(objects);
-            SDC_VERIFY_STREAM(
+            VERIFY_STREAM(
                 objects_.size() <= ObjectsFilter::max_stored_objects_count,
                 "Too many objects: " << objects_.size() << " > "
                                      << ObjectsFilter::max_stored_objects_count);
@@ -700,7 +696,7 @@ namespace sdc::kinematics {
         template <typename RequestGeometryType>
         ALWAYS_INLINE ObjectsFilter GetObjectsMaskForGeometryAt(
             Time timestamp, const RequestGeometryType& geometry, double request_radius) const noexcept {
-            SDC_VERIFY_STREAM(
+            VERIFY_STREAM(
                 timestamp >= start_timestamp_ - time_step_ &&
                     timestamp < start_timestamp_ + time_step_ * slices_.size() + time_step_,
                 "Request out of DynamicObjectsGrid time range: tm="
@@ -717,7 +713,7 @@ namespace sdc::kinematics {
         static const DynamicObject& GetObjectRef(const DynamicObjectT& object) noexcept {
             if constexpr (impl::IsDereferencable<DynamicObjectT>) {
                 return *object;
-            } else if constexpr (impl::IsRefereenceWrapper<DynamicObjectT>) {
+            } else if constexpr (impl::IsReferenceWrapper<DynamicObjectT>) {
                 return object.get();
             } else {
                 return object;

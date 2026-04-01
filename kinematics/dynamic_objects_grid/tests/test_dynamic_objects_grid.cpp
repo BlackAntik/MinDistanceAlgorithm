@@ -10,7 +10,6 @@
 #include "geometry/convert.h"
 #include "geometry/distance.h"
 #include "geometry/envelope.h"
-#include "geometry/lazy_transform_geometry.h"
 #include "geometry/length.h"
 #include "geometry/normalized_box.h"
 #include "geometry/point.h"
@@ -277,17 +276,17 @@ namespace sdc::kinematics {
             const auto slices = 100;
             const auto finish_tm = start_tm + step_tm * slices;
 
-            using Geometry = std::variant<geometry::LazyTransformGeometry<geometry::NormalizedBox>, geometry::Circle>;
+            using Geometry = std::variant<geometry::LazyTransformationGeometry<geometry::NormalizedBox>, geometry::Circle>;
 
             DynamicObjectsGrid<std::shared_ptr<DynamicObject<Geometry>>> grid(
                 5.0, start_tm, slices, step_tm);
 
-            std::vector<geometry::LazyTransformGeometry<geometry::NormalizedBox>> objects_stationary_rect;
+            std::vector<geometry::LazyTransformationGeometry<geometry::NormalizedBox>> objects_stationary_rect;
             std::vector<geometry::Circle> objects_stationary_circles;
             for (size_t i = 0; i < 3; ++i) {
                 auto rect = geometry::Random<geometry::Rectangle>(rd, {.max_width = 4.0, .max_length = 12.0});
                 objects_stationary_rect.push_back(
-                    geometry::Convert<geometry::LazyTransformGeometry<geometry::NormalizedBox>>(rect));
+                    geometry::Convert<geometry::LazyTransformationGeometry<geometry::NormalizedBox>>(rect));
             }
             for (size_t i = 0; i < 3; ++i) {
                 auto circle = geometry::Random<geometry::Circle>(rd, {.min_radius = 0.1, .max_radius = 3.0});
@@ -306,7 +305,7 @@ namespace sdc::kinematics {
             }
             for (size_t i = 0; i < 3; ++i) {
                 objects_dynamic.push_back(DynamicLaw<Geometry>{
-                    .geometry = geometry::Convert<geometry::LazyTransformGeometry<geometry::NormalizedBox>>(
+                    .geometry = geometry::Convert<geometry::LazyTransformationGeometry<geometry::NormalizedBox>>(
                         geometry::Random<geometry::Rectangle>(rd, {.max_width = 4.0, .max_length = 12.0})),
                     .start_time = time::Random<ros::Time>(
                         rd, {.min = time::ToUint64(start_tm), .max = time::ToUint64(finish_tm)}),

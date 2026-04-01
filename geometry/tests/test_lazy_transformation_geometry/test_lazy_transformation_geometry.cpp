@@ -14,7 +14,7 @@
 #include "geometry/generic/rotation.h"
 #include "geometry/generic/scale.h"
 #include "geometry/generic/translation.h"
-#include "geometry/lazy_transform_geometry.h"
+#include "geometry/lazy_transformation_geometry.h"
 #include "geometry/matchers.h"
 #include "geometry/normalized_box.h"
 #include "geometry/point.h"
@@ -106,29 +106,29 @@ namespace sdc::geometry {
         std::optional<double> answer_deep_dist = std::nullopt,
         std::optional<double> answer_or_dist = std::nullopt) {
         auto rd_false_geometry = geometry::Random<std::remove_cvref_t<ToGeometry>>(rd);
-        geometry::LazyTransformGeometry false_ltg{
+        geometry::LazyTransformationGeometry false_ltg{
             &rd_false_geometry, geometry::Random<geometry::Vector>(rd), geometry::Random<geometry::Vector>(rd),
             geometry::RandAngle(rd).toVector()};
 
-        geometry::LazyTransformGeometry ltg1{&geometry, geometry_center, shift, angle};
+        geometry::LazyTransformationGeometry ltg1{&geometry, geometry_center, shift, angle};
         CheckCorrectDistanceLTG(ltg1, from, false_ltg, answer_dist, answer_deep_dist, answer_or_dist);
 
-        geometry::LazyTransformGeometry ltg2{geometry, geometry_center, shift, angle};
+        geometry::LazyTransformationGeometry ltg2{geometry, geometry_center, shift, angle};
         CheckCorrectDistanceLTG(ltg2, from, false_ltg, answer_dist, answer_deep_dist, answer_or_dist);
 
-        geometry::LazyTransformGeometry ltg3{
+        geometry::LazyTransformationGeometry ltg3{
             std::make_shared<ToGeometry>(geometry), geometry_center, shift, angle};
         CheckCorrectDistanceLTG(ltg3, from, false_ltg, answer_dist, answer_deep_dist, answer_or_dist);
 
-        geometry::LazyTransformGeometry ltg4{
+        geometry::LazyTransformationGeometry ltg4{
             std::make_unique<ToGeometry>(geometry), geometry_center, shift, angle};
         CheckCorrectDistanceLTG(ltg4, from, false_ltg, answer_dist, answer_deep_dist, answer_or_dist);
 
-        geometry::LazyTransformGeometry ltg5{
+        geometry::LazyTransformationGeometry ltg5{
             std::reference_wrapper<const ToGeometry>(geometry), geometry_center, shift, angle};
         CheckCorrectDistanceLTG(ltg4, from, false_ltg, answer_dist, answer_deep_dist, answer_or_dist);
 
-        geometry::LazyTransformGeometry ltg6{
+        geometry::LazyTransformationGeometry ltg6{
             std::make_optional<ToGeometry>(geometry), geometry_center, shift, angle};
         CheckCorrectDistanceLTG(ltg4, from, false_ltg, answer_dist, answer_deep_dist, answer_or_dist);
     }
@@ -140,7 +140,7 @@ namespace sdc::geometry {
     }
 
     template <typename FromGeometry, typename InnerGeometry>
-    void TestLazyTransformGeometry(std::mt19937_64 rd) {
+    void TestLazyTransformationGeometry(std::mt19937_64 rd) {
         using geometry::ConceptType;
         size_t iterations = 1'000;
         while (iterations--) {
@@ -304,7 +304,7 @@ namespace sdc::geometry {
                     rd, rd_req, rd_geometry, *rd_center, rd_shift, rd_angle, ans_dist, ans_deep_dist);
             }
             {
-                const auto& ltg_rnd = geometry::Random<geometry::LazyTransformGeometry<InnerGeometry>>(rd);
+                const auto& ltg_rnd = geometry::Random<geometry::LazyTransformationGeometry<InnerGeometry>>(rd);
                 const auto& rnd_box = geometry::Random<geometry::Box>(rd);
                 const auto& rnd_dir = geometry::RandAngle(rd);
                 const auto& rnd_double = math::random<double>(rd, {0.1, 10.0});
@@ -336,7 +336,7 @@ namespace sdc::geometry {
                     geometry::Translate(ltg_rnd, rnd_vec),
                     geometry::Translate(ltg_rnd.real_geometry(), rnd_vec)));
 
-                const auto& fltg_rnd = geometry::Random<geometry::LazyTransformGeometry<InnerGeometry>>(rd);
+                const auto& fltg_rnd = geometry::Random<geometry::LazyTransformationGeometry<InnerGeometry>>(rd);
                 ASSERT_FALSE(geometry::Equals(
                     geometry::Envelope<geometry::Box>(ltg_rnd),
                     geometry::Envelope<geometry::Box>(fltg_rnd.real_geometry())));
@@ -364,62 +364,62 @@ namespace sdc::geometry {
         }
     }
 
-    TEST(DistanceBetweenLazyTransformPoint, Test) {
+    TEST(DistanceBetweenLazyTransformationPoint, Test) {
         std::mt19937_64 rd;
         rd.seed(43);
-        TestLazyTransformGeometry<geometry::Point, geometry::Point>(rd);
-        TestLazyTransformGeometry<geometry::Point, geometry::Circle>(rd);
-        TestLazyTransformGeometry<geometry::Point, geometry::Rectangle>(rd);
-        TestLazyTransformGeometry<geometry::Point, geometry::Box>(rd);
-        TestLazyTransformGeometry<geometry::Point, geometry::SimplePolygon>(rd);
-        TestLazyTransformGeometry<geometry::Point, geometry::Baton>(rd);
+        TestLazyTransformationGeometry<geometry::Point, geometry::Point>(rd);
+        TestLazyTransformationGeometry<geometry::Point, geometry::Circle>(rd);
+        TestLazyTransformationGeometry<geometry::Point, geometry::Rectangle>(rd);
+        TestLazyTransformationGeometry<geometry::Point, geometry::Box>(rd);
+        TestLazyTransformationGeometry<geometry::Point, geometry::SimplePolygon>(rd);
+        TestLazyTransformationGeometry<geometry::Point, geometry::Baton>(rd);
     }
 
-    TEST(DistanceBetweenLazyTransformGeometryCircle, Test) {
+    TEST(DistanceBetweenLazyTransformationGeometryCircle, Test) {
         std::mt19937_64 rd;
         rd.seed(43);
-        TestLazyTransformGeometry<geometry::Circle, geometry::Point>(rd);
-        TestLazyTransformGeometry<geometry::Circle, geometry::Circle>(rd);
-        TestLazyTransformGeometry<geometry::Circle, geometry::Rectangle>(rd);
-        TestLazyTransformGeometry<geometry::Circle, geometry::Box>(rd);
-        TestLazyTransformGeometry<geometry::Circle, geometry::SimplePolygon>(rd);
-        TestLazyTransformGeometry<geometry::Circle, geometry::Baton>(rd);
+        TestLazyTransformationGeometry<geometry::Circle, geometry::Point>(rd);
+        TestLazyTransformationGeometry<geometry::Circle, geometry::Circle>(rd);
+        TestLazyTransformationGeometry<geometry::Circle, geometry::Rectangle>(rd);
+        TestLazyTransformationGeometry<geometry::Circle, geometry::Box>(rd);
+        TestLazyTransformationGeometry<geometry::Circle, geometry::SimplePolygon>(rd);
+        TestLazyTransformationGeometry<geometry::Circle, geometry::Baton>(rd);
     }
 
-    TEST(DistanceBetweenLazyTransformGeometryRectangle, Test) {
+    TEST(DistanceBetweenLazyTransformationGeometryRectangle, Test) {
         std::mt19937_64 rd;
         rd.seed(43);
-        TestLazyTransformGeometry<geometry::Rectangle, geometry::Point>(rd);
-        TestLazyTransformGeometry<geometry::Rectangle, geometry::Circle>(rd);
-        TestLazyTransformGeometry<geometry::Rectangle, geometry::Rectangle>(rd);
-        TestLazyTransformGeometry<geometry::Rectangle, geometry::Box>(rd);
-        TestLazyTransformGeometry<geometry::Rectangle, geometry::SimplePolygon>(rd);
-        TestLazyTransformGeometry<geometry::Rectangle, geometry::Baton>(rd);
+        TestLazyTransformationGeometry<geometry::Rectangle, geometry::Point>(rd);
+        TestLazyTransformationGeometry<geometry::Rectangle, geometry::Circle>(rd);
+        TestLazyTransformationGeometry<geometry::Rectangle, geometry::Rectangle>(rd);
+        TestLazyTransformationGeometry<geometry::Rectangle, geometry::Box>(rd);
+        TestLazyTransformationGeometry<geometry::Rectangle, geometry::SimplePolygon>(rd);
+        TestLazyTransformationGeometry<geometry::Rectangle, geometry::Baton>(rd);
     }
 
-    TEST(DistanceBetweenLazyTransformGeometrySimplePolygon, Test) {
+    TEST(DistanceBetweenLazyTransformationGeometrySimplePolygon, Test) {
         std::mt19937_64 rd;
         rd.seed(43);
-        TestLazyTransformGeometry<geometry::SimplePolygon, geometry::Point>(rd);
-        TestLazyTransformGeometry<geometry::SimplePolygon, geometry::Circle>(rd);
-        TestLazyTransformGeometry<geometry::SimplePolygon, geometry::Rectangle>(rd);
-        TestLazyTransformGeometry<geometry::SimplePolygon, geometry::Box>(rd);
-        TestLazyTransformGeometry<geometry::SimplePolygon, geometry::SimplePolygon>(rd);
-        TestLazyTransformGeometry<geometry::SimplePolygon, geometry::Baton>(rd);
+        TestLazyTransformationGeometry<geometry::SimplePolygon, geometry::Point>(rd);
+        TestLazyTransformationGeometry<geometry::SimplePolygon, geometry::Circle>(rd);
+        TestLazyTransformationGeometry<geometry::SimplePolygon, geometry::Rectangle>(rd);
+        TestLazyTransformationGeometry<geometry::SimplePolygon, geometry::Box>(rd);
+        TestLazyTransformationGeometry<geometry::SimplePolygon, geometry::SimplePolygon>(rd);
+        TestLazyTransformationGeometry<geometry::SimplePolygon, geometry::Baton>(rd);
     }
 
-    TEST(DistanceBetweenLazyTransformGeometryBaton, Test) {
+    TEST(DistanceBetweenLazyTransformationGeometryBaton, Test) {
         std::mt19937_64 rd;
         rd.seed(43);
-        TestLazyTransformGeometry<geometry::Baton, geometry::Point>(rd);
-        TestLazyTransformGeometry<geometry::Baton, geometry::Circle>(rd);
-        TestLazyTransformGeometry<geometry::Baton, geometry::Rectangle>(rd);
-        TestLazyTransformGeometry<geometry::Baton, geometry::Box>(rd);
-        TestLazyTransformGeometry<geometry::Baton, geometry::SimplePolygon>(rd);
-        TestLazyTransformGeometry<geometry::Baton, geometry::Baton>(rd);
+        TestLazyTransformationGeometry<geometry::Baton, geometry::Point>(rd);
+        TestLazyTransformationGeometry<geometry::Baton, geometry::Circle>(rd);
+        TestLazyTransformationGeometry<geometry::Baton, geometry::Rectangle>(rd);
+        TestLazyTransformationGeometry<geometry::Baton, geometry::Box>(rd);
+        TestLazyTransformationGeometry<geometry::Baton, geometry::SimplePolygon>(rd);
+        TestLazyTransformationGeometry<geometry::Baton, geometry::Baton>(rd);
     }
 
-    TEST(SimpleDistanceBetweenLazyTransformGeometryCircleAndPoint, Test) {
+    TEST(SimpleDistanceBetweenLazyTransformationGeometryCircleAndPoint, Test) {
         std::mt19937_64 rd;
         rd.seed(43);
         constexpr auto req = geometry::Point{0, 2};
@@ -441,7 +441,7 @@ namespace sdc::geometry {
 
     TEST(OutputToStream, Test) {
         const auto box = geometry::Box{{0.1, 0.2}, {10.0, 15.0}};
-        const auto lazy = geometry::Convert<LazyTransformGeometry<NormalizedBox>>(box);
+        const auto lazy = geometry::Convert<LazyTransformationGeometry<NormalizedBox>>(box);
         std::stringstream ss;
         ss << lazy;
         ASSERT_EQ(
